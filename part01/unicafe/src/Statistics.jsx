@@ -7,12 +7,16 @@ const Statistics = ({good, neutral, bad}) => {
 
     if(total === 0) {
         return(
-            <p>No feedback has been given.</p>
+            <div>      
+                <h1>statistics</h1>
+                <p>No feedback has been given.</p>
+            </div>
         )
     }
 
     return(
     <>
+        <h1>statistics</h1>
         <table>
             <tbody>
                 <StatisticLine text="good" value={good} />
