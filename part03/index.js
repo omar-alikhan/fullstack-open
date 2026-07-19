@@ -4,6 +4,7 @@ const morgan = require("morgan");
 morgan.token("reqBody", req => JSON.stringify(req.body));
 
 const app = express();
+app.use(express.static('dist'));
 app.use(express.json());
 app.use(morgan(":method :url :status :reqBody :response-time ms"));
 
@@ -29,6 +30,7 @@ let persons = [
     number: "39-23-6423122",
   },
 ];
+
 
 app.get("/info", (request, response) => {
   const timestamp = response.send(
@@ -94,7 +96,7 @@ app.post("/api/persons", (request, response) => {
   response.json(persons);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
