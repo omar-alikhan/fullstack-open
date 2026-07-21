@@ -39,9 +39,8 @@ const App = () => {
           .update(existingPerson.id, personObj)
           .then(returnedPerson => {
             setPersons(
-              persons.with(
-                persons.findIndex(p => p.id === returnedPerson.id),
-                returnedPerson,
+              persons.map(p =>
+                p.id === existingPerson.id ? returnedPerson : p,
               ),
             );
             setNewName("");
@@ -72,24 +71,22 @@ const App = () => {
   };
 
   const handleNameChange = event => {
-    console.log(event.target.value);
     setNewName(event.target.value);
   };
 
   const handleNumberChange = event => {
-    console.log(event.target.value);
     setNewNumber(event.target.value);
   };
 
   const handleFilterChange = event => {
-    console.log(event.target.value);
     setFilter(event.target.value);
   };
 
   const handleDeletePerson = person => {
     if (window.confirm(`Delete ${person.name}`)) {
       personService.remove(person.id).then(deletedPerson => {
-        setPersons(persons.filter(p => p.id !== deletedPerson.id));
+        console.log(deletedPerson);
+        setPersons(persons.filter(p => p.id !== person.id));
       });
     }
   };
