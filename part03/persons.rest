@@ -5,18 +5,16 @@ GET http://localhost:3001/api/persons
 GET http://localhost:3001/info
 
 ### 
-GET http://localhost:3001/api/persons/3
+GET http://localhost:3001/api/persons/6a5e3d9cda04e58f32b10924
 
 ###
 DELETE http://localhost:3001/api/persons/3
 
 ###
-POST http://localhost:3001/api/persons
+PUT http://localhost:3001/api/persons/6a5e3d9cda04e58f32b10924
 Content-Type: application/json
 
 {
-    "name": "Joe Smith",
+    "name": "Khalid",
     "number": "495-8499-34598"
 }
-
-https://example.com/comments/1
