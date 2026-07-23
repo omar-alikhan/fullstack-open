@@ -22,6 +22,20 @@ const App = () => {
     });
   }, []);
 
+  const displayNotification = message => {
+    setNotificationMessage(message);
+    setTimeout(() => {
+      setNotificationMessage(null);
+    }, 5000);
+  };
+
+  const displayError = message => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
+  };
+
   const addName = event => {
     event.preventDefault();
 
@@ -45,28 +59,24 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
-            setNotificationMessage(`Updated number for ${newName}`);
-            setTimeout(() => {
-              setNotificationMessage(null);
-            }, 5000);
+            displayNotification(`Updated number for ${newName}`);
           })
           .catch(error => {
-            setErrorMessage(
-              `Information of ${newName} has already been removed from the server`,
-            );
+            displayError(`${error.response.data.error}`);
           });
       }
     } else {
-      personService.create(personObj).then(returnedPerson => {
-        setPersons(persons.concat(returnedPerson));
-        setNewName("");
-        setNewNumber("");
-      });
-
-      setNotificationMessage(`Added ${newName}`);
-      setTimeout(() => {
-        setNotificationMessage(null);
-      }, 5000);
+      personService
+        .create(personObj)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson));
+          setNewName("");
+          setNewNumber("");
+          displayNotification(`Added ${newName}`);
+        })
+        .catch(error => {
+          displayError(`${error.response.data.error}`);
+        });
     }
   };
 
@@ -85,7 +95,6 @@ const App = () => {
   const handleDeletePerson = person => {
     if (window.confirm(`Delete ${person.name}`)) {
       personService.remove(person.id).then(deletedPerson => {
-        console.log(deletedPerson);
         setPersons(persons.filter(p => p.id !== person.id));
       });
     }
