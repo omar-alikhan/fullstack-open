@@ -1,67 +1,62 @@
-const { test, after, beforeEach, describe } = require("node:test");
+const {
+  before,
+  test,
+  after,
+  beforeEach,
+  describe,
+  beforeAll,
+} = require("node:test");
+const config = require("../utils/config");
 const assert = require("node:assert");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blog");
+const User = require("../models/user");
+const helper = require("./test_helper");
+const bcrypt = require("bcrypt");
 
-const blogs = [
-  {
-    _id: "5a422a851b54a676234d17f7",
-    title: "React patterns",
-    author: "Michael Chan",
-    url: "https://reactpatterns.com/",
-    likes: 7,
-    __v: 0,
-  },
-  {
-    _id: "5a422aa71b54a676234d17f8",
-    title: "Go To Statement Considered Harmful",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-    likes: 5,
-    __v: 0,
-  },
-  {
-    _id: "5a422b3a1b54a676234d17f9",
-    title: "Canonical string reduction",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-    likes: 12,
-    __v: 0,
-  },
-  {
-    _id: "5a422b891b54a676234d17fa",
-    title: "First class tests",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-    likes: 10,
-    __v: 0,
-  },
-  {
-    _id: "5a422ba71b54a676234d17fb",
-    title: "TDD harms architecture",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-    likes: 0,
-    __v: 0,
-  },
-  {
-    _id: "5a422bc61b54a676234d17fc",
-    title: "Type wars",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-    likes: 2,
-    __v: 0,
-  },
-];
+before(async () => {
+  await mongoose.connect(config.MONGODB_URI, { family: 4 });
+});
 
 beforeEach(async () => {
   await Blog.deleteMany({});
-  await Blog.insertMany(blogs);
+  await User.deleteMany({});
+
+  const initialBlogs = helper.initialBlogs;
+  const initialUsers = await helper.initialUsers();
+
+  // 1. Create users to generate IDs
+  const savedUsers = await User.insertMany(initialUsers);
+
+  const userIds = savedUsers.map(user => user.id);
+
+  // 2. Save user IDs to blogs.user
+  const blogsWithUsers = initialBlogs.map((blog, i) => ({
+    ...blog,
+    user: userIds[i % userIds.length],
+  }));
+
+  // 3. Create blogs and generate IDs
+  const savedBlogs = await Blog.insertMany(blogsWithUsers);
+
+  //console.log(savedBlogs);
+
+  // 4. Update user.blogs with generate blog IDs
+  for (const user of savedUsers) {
+    const userBlogIds = savedBlogs
+      .filter(blog => blog.user.toString() === user._id.toString())
+      .map(blog => blog._id);
+
+    user.blogs = userBlogIds;
+    await user.save();
+  }
 });
 
 after(async () => {
+  await User.deleteMany({});
+  await Blog.deleteMany({});
   await mongoose.connection.close();
 });
 
@@ -99,9 +94,18 @@ describe("when retrieving blogs", () => {
 });
 
 describe("when creating new blog", () => {
+  let loggedInUser;
+  beforeEach(async () => {
+    const testUser = {
+      username: "first",
+      password: "sekret",
+    };
+
+    loggedInUser = (await api.post("/api/login").send(testUser)).body;
+  });
+
   test("succeeds with valid id", async () => {
     const newBlog = {
-      _id: "5a422bc61b59a676234d17fc",
       title: "Javascript is so Fun!",
       author: "Omar M. Alikhan",
       url: "http://omar-alikhan.com/articles/i-love-javascript.html",
@@ -111,17 +115,29 @@ describe("when creating new blog", () => {
 
     await api
       .post("/api/blogs")
+      .auth(loggedInUser.token, { type: "bearer" })
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
 
-    const response = await api.get("/api/blogs");
+    const blogsAtEnd = await helper.blogsInDb();
 
-    const contents = response.body.map(r => r.title);
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
 
-    assert.strictEqual(response.body.length, blogs.length + 1);
+    const titles = blogsAtEnd.map(r => r.title);
+    assert(titles.includes("Javascript is so Fun!"));
+  });
 
-    assert(contents.includes("Javascript is so Fun!"));
+  test("fails when no token is provided", async () => {
+    const newBlog = {
+      title: "Javascript is so Fun!",
+      author: "Omar M. Alikhan",
+      url: "http://omar-alikhan.com/articles/i-love-javascript.html",
+      likes: 420,
+      __v: 0,
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(401);
   });
 
   test("defaults to 0 likes", async () => {
@@ -135,6 +151,7 @@ describe("when creating new blog", () => {
 
     await api
       .post("/api/blogs")
+      .auth(loggedInUser.token, { type: "bearer" })
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -159,39 +176,111 @@ describe("when creating new blog", () => {
       __v: 0,
     };
 
-    await api.post("/api/blogs").send(newBlogNoTitle).expect(400);
+    await api
+      .post("/api/blogs")
+      .auth(loggedInUser.token, { type: "bearer" })
+      .send(newBlogNoTitle)
+      .expect(400);
 
-    await api.post("/api/blogs").send(newBlogNoUrl).expect(400);
+    await api
+      .post("/api/blogs")
+      .auth(loggedInUser.token, { type: "bearer" })
+      .send(newBlogNoUrl)
+      .expect(400);
+  });
+
+  test("succeeds with logged in user as the blog's user", async () => {
+    const newBlog = {
+      title: "Javascript is so Fun! Hehe!",
+      author: "Albert Einstein",
+      url: "http://emc2.com/articles/i-love-javascript.html",
+      likes: 420,
+      __v: 0,
+    };
+
+    await api
+      .post("/api/blogs")
+      .auth(loggedInUser.token, { type: "bearer" })
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    const usersAtEnd = await helper.usersInDb();
+
+    assert.strictEqual(blogsAtEnd.at(-1).user.username, loggedInUser.username);
   });
 });
 
 describe("when deleting blogs", () => {
-  test("removes it successfully from DB", async () => {
-    const blogToDelete = blogs[1];
+  test("fails when no token is provided", async () => {
+    const blogs = await helper.blogsInDb();
+    const blogToDeleteId = blogs[0].id;
 
-    await api.delete(`/api/blogs/${blogToDelete._id}`).expect(204);
-    await api.get(`/api/blogs/${blogToDelete._id}`).expect(404);
+    await api.delete(`/api/blogs/${blogToDeleteId}`).expect(401);
+  });
 
-    const response = await api.get("/api/blogs");
-    assert.strictEqual(response.body.length, blogs.length - 1);
+  test("succeeds when user deletes their own blog", async () => {
+    // login as the blog owner (in test setup blog[0] is owned by "root")
+    const ownerLogin = await api
+      .post("/api/login")
+      .send({ username: "root", password: "sekret" });
+    const ownerToken = ownerLogin.body.token;
+
+    const blogs = await helper.blogsInDb();
+    const blogToDelete = blogs.find(b => b.user.username === "root");
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .auth(ownerToken, { type: "bearer" })
+      .expect(204);
+
+    await api.get(`/api/blogs/${blogToDelete.id}`).expect(404);
+
+    const remaining = await api.get("/api/blogs");
+    assert.strictEqual(remaining.body.length, helper.initialBlogs.length - 1);
+  });
+
+  test("fails when a different logged-in user deletes someone else's blog", async () => {
+    // login as a different user (e.g. "first")
+    const otherLogin = await api
+      .post("/api/login")
+      .send({ username: "first", password: "sekret" });
+    const otherToken = otherLogin.body.token;
+
+    const blogs = await helper.blogsInDb();
+    const blogNotOwned = blogs.find(b => b.user.username !== "first");
+
+    await api
+      .delete(`/api/blogs/${blogNotOwned.id}`)
+      .auth(otherToken, { type: "bearer" })
+      .expect(401);
+
+    // verify the blog still exists
+    const stillThere = await api
+      .get(`/api/blogs/${blogNotOwned.id}`)
+      .expect(200);
+    assert.strictEqual(stillThere.body.title, blogNotOwned.title);
+
+    const allBlogs = await api.get("/api/blogs");
+    assert.strictEqual(allBlogs.body.length, helper.initialBlogs.length);
   });
 });
 
 describe("when updating blogs", () => {
   test("without sending a body returns 404", async () => {
-    const blogToUpdate = blogs[0];
+    const blogToUpdate = helper.initialBlogs[0];
     await api.put(`/api/blogs/${blogToUpdate._id}`).expect(404);
   });
 
   test("with a given number of likes it updates successfully", async () => {
-    const blogToUpdate = blogs[0];
+    const blogs = await helper.blogsInDb();
+    const blogToUpdateId = blogs[0].id;
     const updatedLikes = 42;
 
-    await api.put(`/api/blogs/${blogToUpdate._id}`).expect(404);
-    await api
-      .put(`/api/blogs/${blogToUpdate._id}`)
-      .send({ likes: updatedLikes });
-    const updatedBlog = await api.get(`/api/blogs/${blogToUpdate._id}`);
+    await api.put(`/api/blogs/${blogToUpdateId}`).expect(404);
+    await api.put(`/api/blogs/${blogToUpdateId}`).send({ likes: updatedLikes });
+    const updatedBlog = await api.get(`/api/blogs/${blogToUpdateId}`);
 
     const response = await api.get("/api/blogs");
     assert.strictEqual(updatedBlog.body.likes, updatedLikes);

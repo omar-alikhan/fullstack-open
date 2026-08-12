@@ -1,0 +1,66 @@
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI2OTgxIiwiaWQiOiI2YTc5ODY4NDNkNjg1ZDIzMDg0NTAyZWMiLCJpYXQiOjE3ODYzNzk2NDl9.aF4-O-GW8IBpokezRxQVWsOsbkKCda-0wSPIIbuT29A
+
+{
+  "title": "Go To Statement Considered Harmful",
+  "author": "Edsger W. Dijkstra",
+  "url": "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
+  "likes": 5,
+  "__v": 0
+}
+
+###
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI2OTgxIiwiaWQiOiI2YTc5ODY4NDNkNjg1ZDIzMDg0NTAyZWMiLCJpYXQiOjE3ODYzNzk2NDl9.aF4-O-GW8IBpokezRxQVWsOsbkKCda-0wSPIIbuT29A
+
+{
+  "title": "Canonical string reduction",
+  "author": "Edsger W. Dijkstra",
+  "url": "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+  "likes": 12,
+  "__v": 0
+}
+
+###
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "_id": "5a422b891b54a676234d17fa",
+  "title": "First class tests",
+  "author": "Robert C. Martin",
+  "url": "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+  "likes": 10,
+  "__v": 0,
+  "user": "6a78fe023092734fc280b3d4"
+}
+
+###
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "_id": "5a422ba71b54a676234d17fb",
+  "title": "TDD harms architecture",
+  "author": "Robert C. Martin",
+  "url": "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
+  "likes": 0,
+  "__v": 0,
+  "user": "6a78fe023092734fc280b3d4"
+}
+
+###
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "_id": "5a422bc61b54a676234d17fc",
+  "title": "Type wars",
+  "author": "Robert C. Martin",
+  "url": "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
+  "likes": 2,
+  "__v": 0,
+  "user": "6a78fdf33092734fc280b3d3"
+}
