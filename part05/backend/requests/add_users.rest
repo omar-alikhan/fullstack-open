@@ -1,0 +1,33 @@
+POST http://localhost:3001/api/users
+Content-Type: application/json
+
+{
+  "username": "user{{$randomInt 1 9999}}",
+  "name": "Test User {{$randomInt 1 9999}}",
+  "password": "password"
+}
+
+
+
+###
+
+POST http://localhost:3001/api/users
+Content-Type: application/json
+
+{
+    "username": "user6388",
+    "name": "Test User 2472",
+    "password": "shhh",
+    "blogs": ["5a422a851b54a676234d17f7","5a422bc61b54a676234d17fc"],
+    "id": "6a78fdf33092734fc280b3d3"
+}
+
+###
+POST http://localhost:3001/api/users
+Content-Type: application/json
+
+{
+  "username": "user6981",
+  "name": "Test User 2924",
+  "password": "begone"
+}
