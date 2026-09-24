@@ -3,6 +3,7 @@ import "./App.css";
 import LoginForm from "../components/LoginForm";
 import BlogForm from "../components/BlogForm";
 import Togglable from "../components/Togglable";
+import Notification from "../components/Notification";
 import Blog from "../components/Blog";
 import loginService from "../services/login";
 import userService from "../services/user";
@@ -16,6 +17,10 @@ function App() {
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
   const [blogs, setBlogs] = useState(null);
+  const [notification, setNotification] = useState({
+    message: null,
+    type: null,
+  });
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
@@ -34,15 +39,21 @@ function App() {
 
   const handleLogin = async event => {
     event.preventDefault();
-    const user = await loginService.login({ username, password });
-    const blogs = await userService.getBlogs(username);
+    try {
+      const user = await loginService.login({ username, password });
+      const blogs = await userService.getBlogs(username);
+      user.blogs = blogs;
 
-    user.blogs = blogs;
-
-    window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
-    blogService.setToken(user.token);
-    setBlogs(user.blogs);
-    setUser(user);
+      window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
+      blogService.setToken(user.token);
+      setBlogs(user.blogs);
+      setUser(user);
+    } catch (error) {
+      setNotification({ message: error, type: "error" });
+      setTimeout(() => {
+        setNotification({ message: null, type: null });
+      }, 3000);
+    }
   };
 
   const handleLogout = async () => {
@@ -57,16 +68,27 @@ function App() {
 
     try {
       const newBlog = await blogService.create(blogPayload);
-
       setBlogs(existingBlogs => [...existingBlogs, newBlog]);
+      setNotification({ message: `a new blog ${title} by ${author} added` });
+      setTimeout(() => {
+        setNotification({ message: null, type: null });
+      }, 3000);
     } catch (error) {
-      console.error("Failed to create blog:", error);
+      // Make sure error is getting through!
+      setNotification({ message: error, type: "error" });
+      setTimeout(() => {
+        setNotification({ message: null, type: null });
+      }, 3000);
     }
   };
 
   if (user === null) {
     return (
       <div>
+        <Notification
+          message={notification.message}
+          type={notification.type}
+        ></Notification>
         <LoginForm
           handleLogin={handleLogin}
           handleUsernameChange={({ target }) => setUsername(target.value)}
@@ -81,6 +103,10 @@ function App() {
   return (
     <div>
       <h2>blogs</h2>
+      <Notification
+        message={notification.message}
+        type={notification.type}
+      ></Notification>
       {user.name && (
         <p>
           {user.name} logged in <button onClick={handleLogout}> logout</button>
