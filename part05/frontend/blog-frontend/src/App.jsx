@@ -15,12 +15,15 @@ function App() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
+  const [blogs, setBlogs] = useState(null);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
+      blogService.setToken(user.token);
       setUser(user);
+      setBlogs(user.blogs);
     }
   }, []);
 
@@ -37,6 +40,8 @@ function App() {
     user.blogs = blogs;
 
     window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
+    blogService.setToken(user.token);
+    setBlogs(user.blogs);
     setUser(user);
   };
 
@@ -47,7 +52,16 @@ function App() {
 
   const handleCreateBlog = async event => {
     event.preventDefault();
-    console.log(title, author, url);
+
+    const blogPayload = { title, author, url };
+
+    try {
+      const newBlog = await blogService.create(blogPayload);
+
+      setBlogs(existingBlogs => [...existingBlogs, newBlog]);
+    } catch (error) {
+      console.error("Failed to create blog:", error);
+    }
   };
 
   if (user === null) {
@@ -84,7 +98,7 @@ function App() {
         url={url}
       ></BlogForm>
 
-      {user.blogs.map(blog => (
+      {blogs.map(blog => (
         <Blog key={blog.id} blog={blog} />
       ))}
     </div>
