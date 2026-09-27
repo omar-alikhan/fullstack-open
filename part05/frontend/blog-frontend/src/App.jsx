@@ -13,9 +13,6 @@ function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
   const [blogs, setBlogs] = useState(null);
   const [notification, setNotification] = useState({
     message: null,
@@ -61,9 +58,7 @@ function App() {
     setUser(null);
   };
 
-  const handleCreateBlog = async event => {
-    event.preventDefault();
-
+  const handleCreateBlog = async (title, author, url) => {
     const blogPayload = { title, author, url };
 
     try {
@@ -115,15 +110,7 @@ function App() {
 
       <h2>create new</h2>
       <Togglable buttonLabel="create new blog">
-        <BlogForm
-          handleTitleChange={({ target }) => setTitle(target.value)}
-          handleAuthorChange={({ target }) => setAuthor(target.value)}
-          handleUrlChange={({ target }) => setUrl(target.value)}
-          handleCreateBlog={handleCreateBlog}
-          title={title}
-          author={author}
-          url={url}
-        ></BlogForm>
+        <BlogForm handleCreateBlog={handleCreateBlog}></BlogForm>
       </Togglable>
 
       {blogs.map(blog => (
