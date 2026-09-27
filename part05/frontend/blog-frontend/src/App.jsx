@@ -114,15 +114,17 @@ function App() {
       )}
 
       <h2>create new</h2>
-      <BlogForm
-        handleTitleChange={({ target }) => setTitle(target.value)}
-        handleAuthorChange={({ target }) => setAuthor(target.value)}
-        handleUrlChange={({ target }) => setUrl(target.value)}
-        handleCreateBlog={handleCreateBlog}
-        title={title}
-        author={author}
-        url={url}
-      ></BlogForm>
+      <Togglable buttonLabel="create new blog">
+        <BlogForm
+          handleTitleChange={({ target }) => setTitle(target.value)}
+          handleAuthorChange={({ target }) => setAuthor(target.value)}
+          handleUrlChange={({ target }) => setUrl(target.value)}
+          handleCreateBlog={handleCreateBlog}
+          title={title}
+          author={author}
+          url={url}
+        ></BlogForm>
+      </Togglable>
 
       {blogs.map(blog => (
         <Blog key={blog.id} blog={blog} />
