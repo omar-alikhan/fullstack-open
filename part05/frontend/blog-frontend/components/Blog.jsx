@@ -1,12 +1,16 @@
 import { useState } from "react";
 
-const Blog = ({ blog, user, handleLike }) => {
+const Blog = ({ blog, user, handleLike, handleRemove }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
     border: "solid",
     borderWidth: 1,
     marginBottom: 5,
+  };
+
+  const removeButtonStyle = {
+    background: "#3c82f6",
   };
 
   const [showDetails, setShowDetails] = useState(false);
@@ -24,6 +28,9 @@ const Blog = ({ blog, user, handleLike }) => {
           <button onClick={() => handleLike(blog)}>like</button>
         </div>
         <div>{user.name}</div>
+        <button style={removeButtonStyle} onClick={() => handleRemove(blog)}>
+          remove
+        </button>
       </div>
     );
   }

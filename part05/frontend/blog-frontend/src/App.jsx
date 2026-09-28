@@ -87,6 +87,13 @@ function App() {
     setBlogs(user.blogs.map(b => (b.id === blog.id ? updatedBlog : b)));
   };
 
+  const handleRemove = async blog => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      blogService.remove(blog);
+      setBlogs(user.blogs.filter(b => b.id !== blog.id));
+    }
+  };
+
   if (user === null) {
     return (
       <div>
@@ -124,7 +131,13 @@ function App() {
       </Togglable>
 
       {blogs.map(blog => (
-        <Blog key={blog.id} blog={blog} user={user} handleLike={handleLike} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          user={user}
+          handleLike={handleLike}
+          handleRemove={handleRemove}
+        />
       ))}
     </div>
   );
