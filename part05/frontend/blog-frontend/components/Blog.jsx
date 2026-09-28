@@ -20,7 +20,7 @@ const Blog = ({ blog, user, handleLike, handleRemove }) => {
       <div style={blogStyle}>
         <div>
           {blog.title}
-          <button onClick={e => setShowDetails(false)}>hide</button>
+          <button onClick={() => setShowDetails(false)}>hide</button>
         </div>
         <div>{blog.url}</div>
         <div>
@@ -38,7 +38,7 @@ const Blog = ({ blog, user, handleLike, handleRemove }) => {
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author}
-      <button onClick={e => setShowDetails(true)}>view</button>
+      <button onClick={() => setShowDetails(true)}>view</button>
     </div>
   );
 };

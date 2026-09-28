@@ -30,11 +30,6 @@ function App() {
     }
   }, []);
 
-  const handleChange =
-    setter =>
-    ({ target }) =>
-      setter(target.value);
-
   const handleLogin = async event => {
     event.preventDefault();
     try {
