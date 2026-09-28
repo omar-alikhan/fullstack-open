@@ -25,6 +25,7 @@ function App() {
       const user = JSON.parse(loggedUserJSON);
       blogService.setToken(user.token);
       setUser(user);
+      user.blogs.sort((a, b) => a.likes < b.likes);
       setBlogs(user.blogs);
     }
   }, []);
