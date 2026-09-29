@@ -10,8 +10,12 @@ describe("<Blog />", () => {
     url: "https://example.com",
   };
 
+  const user = {
+    name: "Omar",
+  };
+
   beforeEach(() => {
-    render(<Blog blog={blog}></Blog>);
+    render(<Blog blog={blog} user={user}></Blog>);
   });
 
   test("at start the title and author is rendered while URL and likes are not", async () => {
@@ -27,5 +31,17 @@ describe("<Blog />", () => {
 
     expect(url).not.toBeInTheDocument();
     expect(likes).not.toBeInTheDocument();
+  });
+
+  test("after clicking view button, url and likes are rendered", async () => {
+    const user = userEvent.setup();
+    const button = screen.getByText("view");
+    await user.click(button);
+
+    const url = screen.getByText("https://example.com", { exact: false });
+    expect(url).toBeVisible();
+
+    const likes = screen.getByText("5", { exact: false });
+    expect(likes).toBeVisible();
   });
 });
