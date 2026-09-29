@@ -14,8 +14,10 @@ describe("<Blog />", () => {
     name: "Omar",
   };
 
+  const mockLikeHandler = vi.fn();
+
   beforeEach(() => {
-    render(<Blog blog={blog} user={user}></Blog>);
+    render(<Blog blog={blog} user={user} handleLike={mockLikeHandler}></Blog>);
   });
 
   test("at start the title and author is rendered while URL and likes are not", async () => {
@@ -43,5 +45,17 @@ describe("<Blog />", () => {
 
     const likes = screen.getByText("5", { exact: false });
     expect(likes).toBeVisible();
+  });
+
+  test(" if the like button is clicked twice, the event handler the component received as props is called twice", async () => {
+    const user = userEvent.setup();
+    const viewButton = screen.getByText("view");
+    await user.click(viewButton);
+
+    const likeButton = screen.getByText("like");
+    await user.click(likeButton);
+    await user.click(likeButton);
+
+    expect(mockLikeHandler.mock.calls).toHaveLength(2);
   });
 });
