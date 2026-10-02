@@ -45,7 +45,7 @@ function App() {
       setNotification({ message: error, type: "error" });
       setTimeout(() => {
         setNotification({ message: null, type: null });
-      }, 3000);
+      }, 30000);
     }
   };
 
