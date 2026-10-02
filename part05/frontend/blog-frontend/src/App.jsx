@@ -45,7 +45,7 @@ function App() {
       setNotification({ message: error, type: "error" });
       setTimeout(() => {
         setNotification({ message: null, type: null });
-      }, 30000);
+      }, 3000);
     }
   };
 
@@ -60,11 +60,17 @@ function App() {
     try {
       const newBlog = await blogService.create(blogPayload);
       setBlogs(existingBlogs => [...existingBlogs, newBlog]);
-      setNotification({ message: `a new blog ${title} by ${author} added` });
+      setNotification({
+        message: `a new blog ${title} by ${author} added`,
+        type: "success",
+      });
       setTimeout(() => {
         setNotification({ message: null, type: null });
       }, 3000);
     } catch (error) {
+      console.log("blog failed to add");
+      console.log(user.blogs);
+      setBlogs(existingBlogs => [...existingBlogs]);
       // Make sure error is getting through!
       setNotification({ message: error, type: "error" });
       setTimeout(() => {

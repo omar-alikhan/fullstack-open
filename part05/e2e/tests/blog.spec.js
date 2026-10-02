@@ -45,4 +45,36 @@ describe("Blog app", () => {
       await expect(page.getByText("login")).toBeVisible();
     });
   });
+
+  describe("When logged in", () => {
+    beforeEach(async ({ page, request }) => {
+      await request.post("/api/testing/reset");
+      await request.post("/api/users", {
+        data: {
+          name: "Matti Luukkainen",
+          username: "mluukkai",
+          password: "salainen",
+        },
+      });
+      await page.goto("/");
+
+      await page.getByLabel("username").fill("mluukkai");
+      await page.getByLabel("password").fill("salainen");
+      await page.getByText("login").click();
+    });
+
+    test("a new blog can be created", async ({ page }) => {
+      await page.getByRole("button", { name: "create new blog" }).click();
+      await page.getByLabel("title").fill("test title");
+      await page.getByLabel("author").fill("test author");
+      await page.getByLabel("url").fill("http://examples.com");
+      await page.getByRole("button", { name: "create" }).click();
+
+      const notificationDiv = page.getByText(
+        "a new blog test title by test author added",
+      );
+      await expect(notificationDiv).toBeVisible();
+      await expect(page.getByText("test title test author")).toBeVisible();
+    });
+  });
 });

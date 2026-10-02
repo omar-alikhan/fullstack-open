@@ -18,31 +18,40 @@ const BlogForm = ({ handleCreateBlog }) => {
     <>
       <form onSubmit={createBlog}>
         <div>
-          title:
-          <input
-            type="text"
-            value={title}
-            onChange={event => setNewTitle(event.target.value)}
-            placeholder="write blog title here"
-          />
+          <label htmlFor="title-input">
+            title:
+            <input
+              id="title-input"
+              type="text"
+              value={title}
+              onChange={event => setNewTitle(event.target.value)}
+              placeholder="write blog title here"
+            />
+          </label>
         </div>
         <div>
-          author:
-          <input
-            type="text"
-            value={author}
-            onChange={event => setNewAuthor(event.target.value)}
-            placeholder="your name e.g. John Smith"
-          />
+          <label htmlFor="author-input">
+            author:
+            <input
+              id="author-input"
+              type="text"
+              value={author}
+              onChange={event => setNewAuthor(event.target.value)}
+              placeholder="your name e.g. John Smith"
+            />
+          </label>
         </div>
         <div>
-          url:
-          <input
-            type="text"
-            value={url}
-            onChange={event => setNewUrl(event.target.value)}
-            placeholder="your url e.g. https://myblog.com"
-          />
+          <label htmlFor="url-input">
+            url:
+            <input
+              id="url-input"
+              type="text"
+              value={url}
+              onChange={event => setNewUrl(event.target.value)}
+              placeholder="your url e.g. https://myblog.com"
+            />
+          </label>
         </div>
         <button type="submit">create</button>
       </form>
