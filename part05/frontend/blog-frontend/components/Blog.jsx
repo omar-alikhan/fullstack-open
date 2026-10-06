@@ -17,7 +17,7 @@ const Blog = ({ blog, user, handleLike, handleRemove }) => {
 
   if (showDetails) {
     return (
-      <div style={blogStyle}>
+      <div className="blog" style={blogStyle}>
         <div>
           {blog.title}
           <button onClick={() => setShowDetails(false)}>hide</button>

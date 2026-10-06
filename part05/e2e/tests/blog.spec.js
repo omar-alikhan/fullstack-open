@@ -91,5 +91,19 @@ describe("Blog app", () => {
 
       await expect(page.getByText("likes 1")).toBeVisible();
     });
+
+    test.only("logged in user's blog can be removed", async ({ page }) => {
+      await page.getByRole("button", { name: "create new blog" }).click();
+      await page.getByLabel("title").fill("test title");
+      await page.getByLabel("author").fill("test author");
+      await page.getByLabel("url").fill("http://examples.com");
+      await page.getByRole("button", { name: "create" }).click();
+
+      await page.getByRole("button", { name: "view" }).first().click();
+
+      page.on("dialog", dialog => console.log(dialog.accept()));
+      await page.getByRole("button", { name: "remove" }).click();
+      await expect(page.locator(".blog")).not.toBeVisible();
+    });
   });
 });
