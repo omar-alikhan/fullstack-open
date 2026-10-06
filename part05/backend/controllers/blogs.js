@@ -17,17 +17,22 @@ blogsRouter.get("/:id", async (request, response) => {
 });
 
 blogsRouter.post("/", userExtractor, async (request, response) => {
-  if (!request.body.title) return response.status(400).end();
-  if (!request.body.url) return response.status(400).end();
-  const user = request.user;
+  if (!request.body.title || !request.body.url) {
+    return response.status(400).end();
+  }
 
+  const user = request.user;
   const blog = new Blog({ ...request.body, user: user._id });
 
   const savedBlog = await blog.save();
   user.blogs = user.blogs.concat(savedBlog._id);
   await user.save();
 
-  response.status(201).json(savedBlog);
+  const blogWithUser = await savedBlog.populate("user", {
+    username: 1,
+    name: 1,
+  });
+  response.status(201).json(blogWithUser);
 });
 
 blogsRouter.delete("/:id", userExtractor, async (request, response) => {

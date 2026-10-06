@@ -14,6 +14,7 @@ const Blog = ({ blog, user, handleLike, handleRemove }) => {
   };
 
   const [showDetails, setShowDetails] = useState(false);
+  const canRemove = user.username === blog.user.username;
 
   if (showDetails) {
     return (
@@ -27,10 +28,12 @@ const Blog = ({ blog, user, handleLike, handleRemove }) => {
           likes {blog.likes}
           <button onClick={() => handleLike(blog)}>like</button>
         </div>
-        <div>{user.name}</div>
-        <button style={removeButtonStyle} onClick={() => handleRemove(blog)}>
-          remove
-        </button>
+        <div>{blog.user.name}</div>
+        {canRemove && (
+          <button style={removeButtonStyle} onClick={() => handleRemove(blog)}>
+            remove
+          </button>
+        )}
       </div>
     );
   }

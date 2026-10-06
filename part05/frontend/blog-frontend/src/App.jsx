@@ -29,6 +29,7 @@ function App() {
 
       (async () => {
         const data = await blogService.getAll();
+        console.log("initial data", data);
         setBlogs(data);
       })();
     }
@@ -62,9 +63,7 @@ function App() {
 
     try {
       const newBlog = await blogService.create(blogPayload);
-      console.log(newBlog);
       setBlogs(existingBlogs => [...existingBlogs, newBlog]);
-      console.log(blogs);
       setNotification({
         message: `a new blog ${title} by ${author} added`,
         type: "success",

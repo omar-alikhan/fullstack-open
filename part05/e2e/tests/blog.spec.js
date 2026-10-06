@@ -49,6 +49,7 @@ describe("Blog app", () => {
   describe("When logged in", () => {
     beforeEach(async ({ page, request }) => {
       await request.post("/api/testing/reset");
+
       await request.post("/api/users", {
         data: {
           name: "Matti Luukkainen",
@@ -92,7 +93,7 @@ describe("Blog app", () => {
       await expect(page.getByText("likes 1")).toBeVisible();
     });
 
-    test.only("logged in user's blog can be removed", async ({ page }) => {
+    test("logged in user's blog can be removed", async ({ page }) => {
       await page.getByRole("button", { name: "create new blog" }).click();
       await page.getByLabel("title").fill("test title");
       await page.getByLabel("author").fill("test author");
@@ -104,6 +105,47 @@ describe("Blog app", () => {
       page.on("dialog", dialog => console.log(dialog.accept()));
       await page.getByRole("button", { name: "remove" }).click();
       await expect(page.locator(".blog")).not.toBeVisible();
+    });
+
+    test.only("remove button is visible for my blogs only", async ({
+      page,
+      request,
+    }) => {
+      test.setTimeout(4000);
+      await page.getByRole("button", { name: "create new blog" }).click();
+      await page.getByLabel("title").fill("test title");
+      await page.getByLabel("author").fill("test author");
+      await page.getByLabel("url").fill("http://examples.com");
+      await page.getByRole("button", { name: "create" }).click();
+      await page.getByText("logout").click();
+
+      await request.post("/api/users", {
+        data: {
+          name: "John Smith",
+          username: "johnsmith",
+          password: "password",
+        },
+      });
+      await page.goto("/");
+
+      await page.getByLabel("username").fill("johnsmith");
+      await page.getByLabel("password").fill("password");
+      await page.getByText("login").click();
+      await page.getByRole("button", { name: "view" }).click();
+
+      // Only Matti's blog post is visible currently, which should not be removable
+      await expect(
+        page.getByRole("button", { name: "remove" }),
+      ).not.toBeVisible();
+
+      await page.getByRole("button", { name: "create new blog" }).click();
+      await page.getByLabel("title").fill("john's title");
+      await page.getByLabel("author").fill("John Smith");
+      await page.getByLabel("url").fill("http://johnsmithexamples.com");
+      await page.getByRole("button", { name: "create" }).click();
+      await page.getByRole("button", { name: "view" }).last().click();
+
+      await expect(page.getByRole("button", { name: "remove" })).toBeVisible();
     });
   });
 });
