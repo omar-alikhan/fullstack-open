@@ -13,7 +13,7 @@ function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [blogs, setBlogs] = useState(null);
+  const [blogs, setBlogs] = useState([]);
   const [notification, setNotification] = useState({
     message: null,
     type: null,
@@ -21,12 +21,16 @@ function App() {
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
+
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
       blogService.setToken(user.token);
       setUser(user);
-      user.blogs.sort((a, b) => a.likes < b.likes);
-      setBlogs(user.blogs);
+
+      (async () => {
+        const data = await blogService.getAll();
+        setBlogs(data);
+      })();
     }
   }, []);
 
@@ -34,12 +38,11 @@ function App() {
     event.preventDefault();
     try {
       const user = await loginService.login({ username, password });
-      const blogs = await userService.getBlogs(username);
-      user.blogs = blogs;
+      const blogs = await blogService.getAll();
 
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
       blogService.setToken(user.token);
-      setBlogs(user.blogs);
+      setBlogs(blogs);
       setUser(user);
     } catch (error) {
       setNotification({ message: error, type: "error" });
@@ -59,7 +62,9 @@ function App() {
 
     try {
       const newBlog = await blogService.create(blogPayload);
+      console.log(newBlog);
       setBlogs(existingBlogs => [...existingBlogs, newBlog]);
+      console.log(blogs);
       setNotification({
         message: `a new blog ${title} by ${author} added`,
         type: "success",
@@ -69,9 +74,7 @@ function App() {
       }, 3000);
     } catch (error) {
       console.log("blog failed to add");
-      console.log(user.blogs);
       setBlogs(existingBlogs => [...existingBlogs]);
-      // Make sure error is getting through!
       setNotification({ message: error, type: "error" });
       setTimeout(() => {
         setNotification({ message: null, type: null });
@@ -80,18 +83,16 @@ function App() {
   };
 
   const handleLike = async blog => {
-    console.log("like!", blog);
-
     const blogPayload = { ...blog, likes: blog.likes + 1 };
     const updatedBlog = await blogService.update(blogPayload);
 
-    setBlogs(user.blogs.map(b => (b.id === blog.id ? updatedBlog : b)));
+    setBlogs(blogs.map(b => (b.id === blog.id ? updatedBlog : b)));
   };
 
   const handleRemove = async blog => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
       blogService.remove(blog);
-      setBlogs(user.blogs.filter(b => b.id !== blog.id));
+      setBlogs(blogs.filter(b => b.id !== blog.id));
     }
   };
 
@@ -131,15 +132,16 @@ function App() {
         <BlogForm handleCreateBlog={handleCreateBlog}></BlogForm>
       </Togglable>
 
-      {blogs.map(blog => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          user={user}
-          handleLike={handleLike}
-          handleRemove={handleRemove}
-        />
-      ))}
+      {blogs &&
+        blogs.map(blog => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            user={user}
+            handleLike={handleLike}
+            handleRemove={handleRemove}
+          />
+        ))}
     </div>
   );
 }
