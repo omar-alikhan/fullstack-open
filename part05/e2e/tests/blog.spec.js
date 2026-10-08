@@ -107,7 +107,7 @@ describe("Blog app", () => {
       await expect(page.locator(".blog")).not.toBeVisible();
     });
 
-    test.only("remove button is visible for my blogs only", async ({
+    test("remove button is visible for my blogs only", async ({
       page,
       request,
     }) => {
@@ -146,6 +146,77 @@ describe("Blog app", () => {
       await page.getByRole("button", { name: "view" }).last().click();
 
       await expect(page.getByRole("button", { name: "remove" })).toBeVisible();
+    });
+
+    test.only("blogs are arranged from most to least likes", async ({
+      page,
+      request,
+    }) => {
+      test.setTimeout(100000);
+      await page.getByRole("button", { name: "create new blog" }).click();
+
+      await page.getByLabel("title").fill("first title");
+      await page.getByLabel("author").fill("test author");
+      await page.getByLabel("url").fill("http://examples.com");
+      await page.getByRole("button", { name: "create" }).click();
+
+      await page
+        .locator(".blog", { has: page.getByText("first title") })
+        .waitFor();
+
+      await page.getByLabel("title").fill("second title");
+      await page.getByLabel("author").fill("test author");
+      await page.getByLabel("url").fill("http://examples.com");
+      await page.getByRole("button", { name: "create" }).click();
+
+      await page
+        .locator(".blog", { has: page.getByText("second title") })
+        .waitFor();
+
+      await page.getByLabel("title").fill("third title");
+      await page.getByLabel("author").fill("test author");
+      await page.getByLabel("url").fill("http://examples.com");
+      await page.getByRole("button", { name: "create" }).click();
+
+      await page
+        .locator(".blog", { has: page.getByText("third title") })
+        .waitFor();
+
+      const viewButtons = page.getByRole("button", { name: "view" });
+
+      while ((await viewButtons.count()) > 0) {
+        await viewButtons.first().click();
+      }
+
+      const firstBlog = page
+        .locator(".blog")
+        .filter({ hasText: "first title" });
+      const secondBlog = page
+        .locator(".blog")
+        .filter({ hasText: "second title" });
+      const thirdBlog = page
+        .locator(".blog")
+        .filter({ hasText: "third title" });
+
+      for (let i = 0; i < 1; i++) {
+        firstBlog.getByRole("button", { name: "like" }).click();
+        await page.waitForTimeout(500);
+      }
+
+      for (let i = 0; i < 5; i++) {
+        secondBlog.getByRole("button", { name: "like" }).click();
+        await page.waitForTimeout(500);
+      }
+
+      for (let i = 0; i < 3; i++) {
+        thirdBlog.getByRole("button", { name: "like" }).click();
+        await page.waitForTimeout(500);
+      }
+
+      // The final order should be the 2nd post (with 5 votes), 3rd post (with 3 votes), 1st post(with 1 vote)
+      await expect(page.locator(".blog").nth(0)).toContainText("second title");
+      await expect(page.locator(".blog").nth(1)).toContainText("third title");
+      await expect(page.locator(".blog").nth(2)).toContainText("first title");
     });
   });
 });

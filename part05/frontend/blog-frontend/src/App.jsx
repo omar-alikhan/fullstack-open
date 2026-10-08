@@ -20,6 +20,7 @@ function App() {
   });
 
   useEffect(() => {
+    console.log("useEffect()!");
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
 
     if (loggedUserJSON) {
@@ -29,8 +30,8 @@ function App() {
 
       (async () => {
         const data = await blogService.getAll();
-        console.log("initial data", data);
-        setBlogs(data);
+        const sortedData = data.sort((a, b) => b.likes - a.likes);
+        setBlogs(sortedData);
       })();
     }
   }, []);
@@ -84,8 +85,14 @@ function App() {
   const handleLike = async blog => {
     const blogPayload = { ...blog, likes: blog.likes + 1 };
     const updatedBlog = await blogService.update(blogPayload);
+    //console.log("React click fired", blogs);
 
-    setBlogs(blogs.map(b => (b.id === blog.id ? updatedBlog : b)));
+    const sortedAndUpdatedBlogs = [...blogs]
+      .map(b => (b.id === blog.id ? updatedBlog : b))
+      .sort((a, b) => b.likes - a.likes);
+
+    setBlogs(sortedAndUpdatedBlogs);
+    //console.log("React click fired", blogs);
   };
 
   const handleRemove = async blog => {
@@ -113,6 +120,8 @@ function App() {
     );
   }
 
+  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
+
   return (
     <div>
       <h2>blogs</h2>
@@ -125,22 +134,23 @@ function App() {
           {user.name} logged in <button onClick={handleLogout}> logout</button>
         </p>
       )}
-
+      {console.log("render time!")}
       <h2>create new</h2>
       <Togglable buttonLabel="create new blog">
         <BlogForm handleCreateBlog={handleCreateBlog}></BlogForm>
       </Togglable>
-
-      {blogs &&
-        blogs.map(blog => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            user={user}
-            handleLike={handleLike}
-            handleRemove={handleRemove}
-          />
-        ))}
+      <div className="blogs">
+        {blogs &&
+          sortedBlogs.map(blog => (
+            <Blog
+              key={blog.id}
+              blog={blog}
+              user={user}
+              handleLike={handleLike}
+              handleRemove={handleRemove}
+            />
+          ))}
+      </div>
     </div>
   );
 }

@@ -60,7 +60,12 @@ blogsRouter.put("/:id", async (request, response) => {
 
   const updatedBlog = await blog.save();
 
-  response.json(updatedBlog);
+  const blogWithUser = await updatedBlog.populate("user", {
+    username: 1,
+    name: 1,
+  });
+
+  response.json(blogWithUser);
 });
 
 module.exports = blogsRouter;
