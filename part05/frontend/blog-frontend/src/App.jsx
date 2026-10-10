@@ -3,10 +3,11 @@ import { Routes, Route, Link, Navigate, useNavigate } from "react-router-dom";
 import "./App.css";
 import LoginForm from "../components/LoginForm";
 import BlogForm from "../components/BlogForm";
+import BlogList from "../components/BlogList";
+import Blog from "../components/Blog";
 import Notification from "../components/Notification";
 import loginService from "../services/login";
 import blogService from "../services/blog";
-import BlogList from "../components/BlogList";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -131,12 +132,21 @@ function App() {
       </div>
 
       <Routes>
-        {/* <Route path="/blogs" element={<BlogList blogs={blogs}></BlogList>} />
-        <Route path="/create" element={<BlogForm createBlog={addBlog} />} /> */}
         <Route
           path="/"
           element={
             <BlogList
+              blogs={blogs}
+              user={user}
+              handleLike={handleLike}
+              handleRemove={handleRemove}
+            />
+          }
+        />
+        <Route
+          path="/blogs/:id"
+          element={
+            <Blog
               blogs={blogs}
               user={user}
               handleLike={handleLike}
