@@ -85,6 +85,8 @@ function App() {
         setNotification({ message: null, type: null });
       }, 3000);
     }
+
+    navigate("/");
   };
 
   const handleLike = async blog => {
@@ -103,6 +105,8 @@ function App() {
       blogService.remove(blog);
       setBlogs(blogs.filter(b => b.id !== blog.id));
     }
+
+    navigate("/");
   };
 
   return (
@@ -115,6 +119,11 @@ function App() {
         <Link style={padding} to="/">
           blogs
         </Link>
+        {user && (
+          <Link style={padding} to="/create">
+            new blog
+          </Link>
+        )}
         {user ? (
           <button style={padding} onClick={handleLogout}>
             logout
@@ -122,11 +131,6 @@ function App() {
         ) : (
           <Link style={padding} to="/login">
             login
-          </Link>
-        )}
-        {user && (
-          <Link style={padding} to="/create">
-            new blog
           </Link>
         )}
       </div>

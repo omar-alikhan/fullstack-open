@@ -4,11 +4,11 @@ const Blog = ({ blogs, user, handleLike, handleRemove }) => {
   if (blogs.length === 0) return <div>Loading blog...</div>;
 
   const id = useParams().id;
-  const blog = blogs?.find(b => b.id === id);
-  const canRemove = user && user.username === blog.user.username;
-  const canLike = !!user;
+  const blog = blogs.find(b => b.id === id);
 
   if (blog) {
+    const canRemove = user && user.username === blog.user.username;
+    const canLike = !!user;
     return (
       <div className="blog">
         <h1>{blog.title}</h1>
