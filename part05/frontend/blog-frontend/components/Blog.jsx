@@ -14,7 +14,7 @@ const Blog = ({ blog, user, handleLike, handleRemove }) => {
   };
 
   const [showDetails, setShowDetails] = useState(false);
-  const canRemove = user.username === blog.user.username;
+  const canRemove = user && user.username === blog.user.username;
 
   if (showDetails) {
     return (
