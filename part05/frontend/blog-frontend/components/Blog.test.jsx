@@ -1,61 +1,125 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Blog from "./Blog";
+import { expect } from "vitest";
 
 describe("<Blog />", () => {
-  const blog = {
-    title: "A title",
-    author: "An author",
-    likes: 5,
-    url: "https://example.com",
-  };
+  describe("when not logged in...", () => {
+    const blog = [
+      {
+        title: "A title",
+        author: "An author",
+        likes: 5,
+        url: "http://example.com",
+        user: {
+          name: "Test user",
+          username: "testuser123",
+        },
+      },
+    ];
+    const user = null;
+    const mockLikeHandler = vi.fn();
+    const mockRemoveHandler = vi.fn();
+    beforeEach(() => {
+      render(
+        <Blog
+          blogs={blog}
+          user={user}
+          handleLike={mockLikeHandler}
+          handleRemove={mockRemoveHandler}
+        ></Blog>,
+      );
+    });
+    test("blog information and the number of likes are displayed, but buttons are not displayed", async () => {
+      const title = await screen.findByText("A title", { exact: false });
+      const author = await screen.findByText("Test user", { exact: false });
+      const url = screen.queryByText("http://example.com", { exact: false });
+      expect(url).toBeInTheDocument();
+      expect(title).toBeVisible();
+      expect(author).toBeVisible();
 
-  const user = {
-    name: "Omar",
-  };
+      const likeButton = screen.queryByRole("button", { name: "like" });
+      expect(likeButton).not.toBeInTheDocument();
 
-  const mockLikeHandler = vi.fn();
-
-  beforeEach(() => {
-    render(<Blog blog={blog} user={user} handleLike={mockLikeHandler}></Blog>);
+      const removeButton = screen.queryByRole("button", { name: "remove" });
+      expect(removeButton).not.toBeInTheDocument();
+    });
   });
 
-  test("at start the title and author is rendered while URL and likes are not", async () => {
-    const title = await screen.findByText("A title", { exact: false });
+  describe("when logged in...", () => {
+    test("shows like but not remove for blogs created by someone else", async () => {
+      const user = {
+        name: "Test user",
+        username: "testuser123",
+      };
 
-    const author = await screen.findByText("An author", { exact: false });
-    expect(title).toBeVisible();
-    expect(author).toBeVisible();
+      const blog = [
+        {
+          title: "Another title",
+          author: "Another author",
+          likes: 9,
+          url: "http://anotherexample.com",
+          user: {
+            name: "Another user",
+            username: "anotheruser123",
+          },
+        },
+      ];
+      const mockLikeHandler = vi.fn();
+      const mockRemoveHandler = vi.fn();
 
-    const url = screen.queryByText("http://example.com", { exact: false });
-    expect(url).not.toBeInTheDocument();
-    const likes = await screen.queryByText("5", { exact: false });
+      render(
+        <Blog
+          blogs={blog}
+          user={user}
+          handleLike={mockLikeHandler}
+          handleRemove={mockRemoveHandler}
+        ></Blog>,
+      );
 
-    expect(url).not.toBeInTheDocument();
-    expect(likes).not.toBeInTheDocument();
-  });
+      const likeButton = screen.queryByRole("button", { name: "like" });
+      expect(likeButton).toBeInTheDocument();
 
-  test("after clicking view button, url and likes are rendered", async () => {
-    const user = userEvent.setup();
-    const button = screen.getByText("view");
-    await user.click(button);
+      const removeButton = screen.queryByRole("button", { name: "remove" });
+      expect(removeButton).not.toBeInTheDocument();
+    });
 
-    const url = screen.getByText("https://example.com", { exact: false });
-    expect(url).toBeVisible();
+    test("shows remove button for blogs created by logged-in user", async () => {
+      const user = {
+        name: "Test user",
+        username: "testuser123",
+      };
 
-    const likes = screen.getByText("5", { exact: false });
-    expect(likes).toBeVisible();
-  });
+      const blog = [
+        {
+          title: "A title",
+          author: "An author",
+          likes: 9,
+          url: "http://anotherexample.com",
+          user: {
+            name: "Test user",
+            username: "testuser123",
+          },
+        },
+      ];
 
-  test("if the like button is clicked twice, the event handler the component received as props is called twice", async () => {
-    const user = userEvent.setup();
-    const viewButton = screen.getByText("view");
-    await user.click(viewButton);
+      const mockLikeHandler = vi.fn();
+      const mockRemoveHandler = vi.fn();
 
-    const likeButton = screen.getByText("like");
-    await user.click(likeButton);
-    await user.click(likeButton);
+      render(
+        <Blog
+          blogs={blog}
+          user={user}
+          handleLike={mockLikeHandler}
+          handleRemove={mockRemoveHandler}
+        ></Blog>,
+      );
 
-    expect(mockLikeHandler.mock.calls).toHaveLength(2);
+      const likeButton = screen.queryByRole("button", { name: "like" });
+      expect(likeButton).toBeInTheDocument();
+
+      const removeButton = screen.queryByRole("button", { name: "remove" });
+      expect(removeButton).toBeInTheDocument();
+    });
   });
 });
