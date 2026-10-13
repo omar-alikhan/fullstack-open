@@ -1,4 +1,47 @@
 import { useState } from "react";
+import styled from "styled-components";
+
+const Input = styled.input`
+  margin: 0.25em;
+  width: 300px;
+  padding: 0.5em 0.75em;
+  font-size: 1rem;
+  border: 2px solid #000;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 #000;
+  outline: none;
+
+  &:focus {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
+  }
+`;
+
+const Button = styled.button`
+  margin: 0.25em;
+  padding: 0.5em 1em;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  background-color: #ffd60a;
+  border: 2px solid #000;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 #000;
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+
+  &:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
+  }
+
+  &:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 #000;
+  }
+`;
 
 const LoginForm = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
@@ -16,7 +59,7 @@ const LoginForm = ({ handleLogin }) => {
         <div>
           <label htmlFor="username">
             username
-            <input
+            <Input
               type="text"
               id="username"
               value={username}
@@ -27,7 +70,7 @@ const LoginForm = ({ handleLogin }) => {
         <div>
           <label htmlFor="password">
             password
-            <input
+            <Input
               type="password"
               id="password"
               value={password}
@@ -35,7 +78,7 @@ const LoginForm = ({ handleLogin }) => {
             />
           </label>
         </div>
-        <button>login</button>
+        <Button>login</Button>
       </form>
     </>
   );
