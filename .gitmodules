@@ -4,3 +4,6 @@
 [submodule "part07"]
 	path = part07
 	url = https://github.com/omar-alikhan/fs-extension.git
+[submodule "part08"]
+	path = part08
+	url = https://github.com/omar-alikhan/fs-graphql.git
