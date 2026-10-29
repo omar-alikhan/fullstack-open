@@ -1,3 +1,6 @@
 [submodule "part06"]
 	path = part06
 	url = https://github.com/omar-alikhan/fs-statemanagement.git
+[submodule "part07"]
+	path = part07
+	url = https://github.com/omar-alikhan/fs-extension.git
