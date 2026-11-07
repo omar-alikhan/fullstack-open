@@ -7,3 +7,6 @@
 [submodule "part08"]
 	path = part08
 	url = https://github.com/omar-alikhan/fs-graphql.git
+[submodule "part09"]
+	path = part09
+	url = https://github.com/fullstack-hy2020/fs-typescript.git
